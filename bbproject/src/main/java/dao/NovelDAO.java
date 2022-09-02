@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import util.JDBCUtil;
-import vo.MemberVO;
 import vo.NovelVO;
 
 public class NovelDAO {
@@ -18,6 +17,9 @@ public class NovelDAO {
    final String sql_selectAll_NW="SELECT * FROM (SELECT A.*, ROWNUM AS RNUM FROM(SELECT * FROM NOVEL WHERE NWRITER LIKE '%'||?||'%' ORDER BY NID ASC) A WHERE ROWNUM < = ?+19)WHERE RNUM  > = ?";
    final String sql_selectAll_N="SELECT * FROM (SELECT A.*, ROWNUM AS RNUM FROM(SELECT * FROM NOVEL ORDER BY NID ASC) A WHERE ROWNUM < = ?+19)WHERE RNUM  > = ?";
    // 검색기능 추가로 selectAll을 3개로 나누었다.
+   
+	final String sql_selectAll_NOVEL_COUNT="SELECT COUNT(*) AS CNT FROM NOVEL";
+
 
    final String sql_selectAll_AVG="SELECT NID, AVG(OSTAR) AS AVG FROM OPINION WHERE NID = ? GROUP BY NID";
    final String sql_selectAll_AVG2="SELECT NID, AVG(OSTAR) AS AVG FROM OPINION GROUP BY NID";
@@ -33,6 +35,24 @@ public class NovelDAO {
    final String sql_insert_N="INSERT INTO NOVEL VALUES((SELECT NVL(MAX(NID),0)+1 FROM NOVEL),?,?,?,?,?)";
    final String sql_sample = "SELECT COUNT(*) AS CNT FROM NOVEL";
    // 프로그램 실행 시 샘플데이터 확인 용
+   
+	public NovelVO selectAll_NOVEL_COUNT (NovelVO bvo){
+		NovelVO data=new NovelVO();
+		conn=JDBCUtil.connect();
+		try {
+			pstmt=conn.prepareStatement(sql_selectAll_NOVEL_COUNT);
+			ResultSet rs=pstmt.executeQuery();
+			while(rs.next()) {
+				data.setNcnt(rs.getInt("CNT")); // 전체 게시글 
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			JDBCUtil.disconnect(pstmt, conn);
+		}      
+		return data;
+	}
 
    public ArrayList<NovelVO> selectAll(NovelVO nvo){
       ArrayList<NovelVO> datas=new ArrayList<NovelVO>();
@@ -133,7 +153,7 @@ public class NovelDAO {
                   data.setAvg(rs2.getDouble("AVG"));
             }else {
                data.setAvg(0);
-               System.out.println("로그 :" + data);
+      //         System.out.println("로그 :" + data);
             }
             datas.add(data);
          }
@@ -206,7 +226,6 @@ public class NovelDAO {
       }      
       return null;
    }
-
 
    public boolean hasSample(NovelVO nvo) {
       conn = JDBCUtil.connect();

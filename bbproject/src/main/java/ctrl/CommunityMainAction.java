@@ -33,7 +33,7 @@ public class CommunityMainAction implements Action{
 		}
 		
 		datas = dao.sql_selectAll_BoardAll(vo); // 검색한 배열 or 전체 배열
-		System.out.println(datas);	
+//		System.out.println(datas);	
 		request.setAttribute("datas", datas);
 		
 		ActionForward forward=new ActionForward();

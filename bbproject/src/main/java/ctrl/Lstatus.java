@@ -40,17 +40,24 @@ public class Lstatus extends HttpServlet {
 		
 		vo.setMid(request.getParameter("mid")); // 추천을 누른 사용자 id
 		vo.setBid(Integer.parseInt(request.getParameter("bid"))); // 추천을 눌린 게시글 번호
-
-		vo = dao.selectOne(vo); // 해당 lid가 있는지 확인
 		
+		vo = dao.selectOne(vo); // 해당 lid가 있는지 확인
 		if(vo != null) { // 결과가 있다면
-			if(vo.getReport()==1 && vo.getNlstatus()!=1) { // 신고가 되어 있고 비추천이 안눌려 있다면 추천 업데이트
+			if(vo.getReport()==1 && vo.getNlstatus()==0) { // 신고가 되어 있고 비추천이 안눌려 있다면 추천 업데이트
+				vo.setFlag(true);
 				dao.update_L(vo);
-				System.out.println("로그: 추천 update");
+				if(vo.getLstatus()==0) {
+					System.out.println("로그: 추천 +1");
+				}
+				else {
+					System.out.println("로그: 추천 -1");
+				}
 			}
 			else { // 신고, 비추천 둘다 안되어 있다면 삭제
-				dao.delete_L(vo);
-				System.out.println("로그: 추천 delete");
+				if(vo.getNlstatus()==0 && vo.getReport()==0) {
+					dao.delete_L(vo);
+					System.out.println("로그: 추천 delete");
+				}
 			}
 		}
 		else { // 결과가 없다면 추천 생성
@@ -58,6 +65,7 @@ public class Lstatus extends HttpServlet {
 			vo2.setMid(request.getParameter("mid"));
 			vo2.setBid(Integer.parseInt(request.getParameter("bid")));
 			vo2.setFlag(true); // true면 추천 생성
+			System.out.println(vo2);
 			System.out.println("로그: 추천 insert");
 			dao.insert_STATUS(vo2);
 		}

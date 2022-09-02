@@ -39,9 +39,12 @@
 		<h2>커뮤니티 글 작성하기</h2>
 		<div style="margin-top:1%;">!음란물, 차별, 비하, 혐오 및 초상권, 저작권 침해 게시물은 민, 형사상의 책임을 질 수 있습니다. </div>
 		</div>
-			<form action="insertB.do" method="post">
+			<form action="InsertB" method="post" enctype="multipart/form-data">
 				<input type="text" name="btitle" placeholder="제목을 입력해주세요">
-				  <textarea name="bcontent" id="editor" style="height: 500px;"></textarea>
+				  <textarea name="bcontent" id="editor" style="height: 500px;">
+				  </textarea>
+				 <input type="file" name="bimg" placeholder="제목을 입력해주세요" onchange="loadFile(this)">
+				 <img alt="미리보기" id="preview" />
 				  
 				  <input type="submit" value="작성 완료" style="float:right; margin-top:0.5%;">
 				  <button id="cancel" style="font-size:15px; float : right; margin-top:0.5%; margin-right:2%;">취소</button>
@@ -49,7 +52,23 @@
 				  </div>
 				</div>
 			</div>
-		
+		<script type="text/javascript">
+	function loadFile(input){
+		// 여러개의 이미지를 읽을수도 있기 때문에 
+		if(input.files && input.files[0]){
+			var fr = new FileReader();
+			//파일리더로 일고 읽는게 완료되면  만들어준 아이디에 속성값을 지정하여 사용하겠다.
+			fr.onload=function(event){
+				document.getElementById('preview').src=event.target.result;
+			};
+			fr.readAsDataURL(input.files[0]);
+			// 이미지파일을 읽어 온다.
+		}
+		else{
+			document.getElementById('preview').src="";
+		}
+	}
+</script>
 <!-- footer section-->
 <bb:footer/>
 <!-- end of footer section-->

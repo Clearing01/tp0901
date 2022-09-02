@@ -41,9 +41,12 @@ public class BoardDAO {
 	final String sql_selectAll_Reply_re="SELECT * FROM REPLY_RE LEFT OUTER JOIN REPLY ON REPLY_RE.RID=REPLY.RID WHERE REPLY_RE.RID=? ORDER BY RRID DESC ";
 	// 대댓글 전체 출력 = 해당 댓글과 맞는 대댓글  
 
-	final String sql_insert_B="INSERT INTO BOARD VALUES((SELECT NVL(MAX(BID),1000)+1 FROM BOARD),?,?,TO_DATE(sysdate,'yyyy.mm.dd hh24:mi'),?)";
+	final String sql_insert_B="INSERT INTO BOARD VALUES((SELECT NVL(MAX(BID),1000)+1 FROM BOARD),?,?,TO_CHAR(sysdate,'yyyy.mm.dd hh24:mi'),?,?)";
 	final String sql_update_B="UPDATE BOARD SET TITLE=?,CONTENT=? WHERE BID=?";
 	final String sql_delete_B="DELETE FROM BOARD WHERE BID=?";
+	
+	final String sql_selectAll_BOARD_COUNT="SELECT COUNT(*) AS CNT FROM BOARD";
+
 
 	//========================================================================================================================================================
 
@@ -61,22 +64,40 @@ public class BoardDAO {
 
 	final String sql_selectOne_Report="SELECT COUNT(*) AS CNT FROM BOARD B JOIN LLIKE L ON B.BID=L.BID "
 			+ "WHERE L.BID=? AND L.REPORT=1";
-
+	
+	public BoardVO selectAll_BOARD_COUNT (BoardVO bvo){
+		BoardVO data=new BoardVO();
+		conn=JDBCUtil.connect();
+		try {
+			pstmt=conn.prepareStatement(sql_selectAll_BOARD_COUNT);
+			ResultSet rs=pstmt.executeQuery();
+			while(rs.next()) {
+				data.setBcnt(rs.getInt("CNT")); // 전체 게시글 
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			JDBCUtil.disconnect(pstmt, conn);
+		}      
+		return data;
+	}
+	
 	public int selectOne_cnt (BoardVO bvo){
 		conn=JDBCUtil.connect();
 		int cnt = 0;
 		try {
 			if(bvo.getCnt_l()==1) { // 해당 게시물 추천수 확인 
-				pstmt.setInt(1, bvo.getBid());
 				pstmt=conn.prepareStatement(sql_selectOne_Lstatus);            
+				pstmt.setInt(1, bvo.getBid());
 			}
 			if(bvo.getCnt_n()==1) {
-				pstmt.setInt(1, bvo.getBid());
 				pstmt=conn.prepareStatement(sql_selectOne_NLstatus);            
+				pstmt.setInt(1, bvo.getBid());
 			}
 			if(bvo.getCnt_r()==1) {
-				pstmt.setInt(1, bvo.getBid());
 				pstmt=conn.prepareStatement(sql_selectOne_Report);            
+				pstmt.setInt(1, bvo.getBid());
 			}
 			ResultSet rs=pstmt.executeQuery();
 			if(rs.next()) {
@@ -175,7 +196,7 @@ public class BoardDAO {
 	public BoardSet sql_selectOne_BoardOne(BoardVO bvo) {
 		conn=JDBCUtil.connect();
 		BoardSet bs = new BoardSet();
-		System.out.println("시작로그");
+//		System.out.println("시작로그");
 		try {
 			pstmt=conn.prepareStatement(sql_selectOne_BoardOne);
 			pstmt.setInt(1, bvo.getBid());
@@ -187,6 +208,35 @@ public class BoardDAO {
 				boardVO.setBcontent(rs.getString("BCONTENT"));
 				boardVO.setBtitle(rs.getString("BTITLE"));
 				boardVO.setBdate(rs.getString("BDATE"));
+				boardVO.setBimg(rs.getString("BIMG"));
+				System.out.println(rs.getString("BIMG"));
+				pstmt=conn.prepareStatement(sql_selectOne_Lstatus);
+				pstmt.setInt(1, rs.getInt("BID"));
+				ResultSet rs4=pstmt.executeQuery();
+				if(rs4.next()) {
+					boardVO.setCnt_l(rs4.getInt("CNT"));
+				}
+				else {
+					boardVO.setCnt_l(0);
+				}
+				pstmt=conn.prepareStatement(sql_selectOne_NLstatus);
+				pstmt.setInt(1, rs.getInt("BID"));
+				ResultSet rs5=pstmt.executeQuery();
+				if(rs5.next()) {
+					boardVO.setCnt_n(rs5.getInt("CNT"));
+				}
+				else {
+					boardVO.setCnt_n(0);
+				}
+				pstmt=conn.prepareStatement(sql_selectOne_Report);
+				pstmt.setInt(1, rs.getInt("BID"));
+				ResultSet rs6=pstmt.executeQuery();
+				if(rs6.next()) {
+					boardVO.setCnt_r(rs6.getInt("CNT"));
+				}
+				else {
+					boardVO.setCnt_r(0);
+				}
 				if(rs.getString("NICKNAME")==null) {
 					boardVO.setMid("[이름없음]");
 				} else {
@@ -196,14 +246,14 @@ public class BoardDAO {
 				bs.setBoardVO(boardVO);
 
 				ArrayList<ReplySet> replySet = new ArrayList<ReplySet>();
-				ReplyVO rvo = new ReplyVO();
 				pstmt=conn.prepareStatement(sql_selectAll_ReplyAll_Board);
 				pstmt.setInt(1, bvo.getBid());
 				ResultSet rs2 =pstmt.executeQuery();
-				System.out.println("댓글 all 로그");
+//				System.out.println("댓글 all 로그");
 				while(rs2.next()) {
-					System.out.println("replyset 로그");
+//					System.out.println("replyset 로그");
 					ReplySet rSet = new ReplySet();
+					ReplyVO rvo = new ReplyVO();
 					rvo.setRid(rs2.getInt("RID"));
 					rvo.setBid(rs2.getInt("BID"));
 					rvo.setRcontent(rs2.getString("RCONTENT"));
@@ -214,8 +264,8 @@ public class BoardDAO {
 						// WRITER대신 MNAME을 담아서 WRITER를 뽑으면 MNAME이 출력된다.
 						rvo.setMid(rs.getString("NICKNAME"));
 					}
-					System.out.println(rs2.getString("RCONTENT"));
-					System.out.println(rvo);
+//					System.out.println(rs2.getString("RCONTENT"));
+//					System.out.println(rvo);
 					rSet.setReplyVO(rvo);
 					
 
@@ -241,10 +291,8 @@ public class BoardDAO {
 					}
 					rSet.setrrList(rrList);
 					replySet.add(rSet);
-					bs.setReplySet(replySet);
-
 				}
-
+				bs.setReplySet(replySet);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -257,7 +305,7 @@ public class BoardDAO {
 	public ArrayList<BoardSet> sql_selectAll_BoardAll(BoardVO bvo){
 		ArrayList<BoardSet> datas = new ArrayList<BoardSet>();
 		conn=JDBCUtil.connect();
-		System.out.println("시작로그");
+//		System.out.println("시작로그");
 		if(bvo.getSearchCondition() == null) {
 			bvo.setSearchCondition("");
 		}
@@ -280,7 +328,7 @@ public class BoardDAO {
 				pstmt.setInt(2, bvo.getBcnt());
 			}
 			ResultSet rs=pstmt.executeQuery();
-			System.out.println("시작한다?!");
+//			System.out.println("시작한다?!");
 			while(rs.next()) {
 				BoardSet bs = new BoardSet();
 				BoardVO boardVO = new BoardVO();
@@ -297,6 +345,24 @@ public class BoardDAO {
 				else {
 					boardVO.setCnt_l(0);
 				}
+				pstmt=conn.prepareStatement(sql_selectOne_NLstatus);
+				pstmt.setInt(1, rs.getInt("BID"));
+				ResultSet rs5=pstmt.executeQuery();
+				if(rs5.next()) {
+					boardVO.setCnt_n(rs5.getInt("CNT"));
+				}
+				else {
+					boardVO.setCnt_n(0);
+				}
+				pstmt=conn.prepareStatement(sql_selectOne_Report);
+				pstmt.setInt(1, rs.getInt("BID"));
+				ResultSet rs6=pstmt.executeQuery();
+				if(rs6.next()) {
+					boardVO.setCnt_r(rs6.getInt("CNT"));
+				}
+				else {
+					boardVO.setCnt_r(0);
+				}
 				if(rs.getString("NICKNAME")==null) {
 					boardVO.setMid("[이름없음]");
 				} else {
@@ -306,11 +372,10 @@ public class BoardDAO {
 				bs.setBoardVO(boardVO);
 
 				ArrayList<ReplySet> replySet = new ArrayList<ReplySet>();
-				System.out.println("댓글 all로그");
+//				System.out.println("댓글 all로그");
 				pstmt=conn.prepareStatement(sql_selectAll_ReplyAll);
 				pstmt.setString(1, bvo.getMid());
 				ResultSet rs2 =pstmt.executeQuery();
-				System.out.println("댓글 all 로그 2");
 				while(rs2.next()) {
 					ReplyVO rvo = new ReplyVO();
 					ReplySet rSet = new ReplySet();
@@ -367,6 +432,7 @@ public class BoardDAO {
 			pstmt.setString(1, bvo.getBtitle());
 			pstmt.setString(2, bvo.getBcontent());
 			pstmt.setString(3, bvo.getMid());
+			pstmt.setString(4, bvo.getBimg());
 
 
 			pstmt.executeUpdate();

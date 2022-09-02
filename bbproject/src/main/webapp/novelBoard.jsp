@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib tagdir="/WEB-INF/tags" prefix="bb" %>
 <!DOCTYPE html>
 <html lang="en" class="no-js">
@@ -100,75 +101,81 @@
 						            <div class="row">
 						            	<div class="col-md-8 col-sm-12 col-xs-12">
 						            		<h4 style="width:750px;">${data.ncontent}</h4>
-						            		
-											
-											
 						            	</div>
-						            	
 						            </div>
 						        </div>
+						        
 						        <div id="reviews" class="tab review">
 						           <div class="row">
-						       	 				
+						       	 		<c:if test="${member != null}">	
 						            	<div class="rv-hd">
 						            		<div class="div">
-							            		
 							            	</div>
 							            	<br>
 							            	<br>
 							            	<div>
-							            		<form action="insertO.do" class="formform">
-							            		<input type="hidden" name="ostar"value="">
-							            		<input type="hidden" name="nid"value="">
-							            			<textarea rows="40" cols="100" placeholder="댓글을 작성해주세요 최대 500자" name="ocontent" style="height:100px;left:50px;top:51px;">
-
-
-							            			
+							            		<form action="insertO.do" class="mb-3" name="myform" id="myform" method="post" style=" text-align: end; width: 95%;">
+							            			<input type="hidden" name="nid" value="${data.nid}">
+													<fieldset>
+														<span class="text-bold">별점을 선택해주세요</span>
+																<input type="radio" name="ostar" value="5" id="rate1"><label for="rate1">★</label>
+																<input type="radio" name="ostar" value="4" id="rate2"><label for="rate2">★</label>
+																<input type="radio" name="ostar" value="3" id="rate3"><label for="rate3">★</label>
+																<input type="radio" name="ostar" value="2" id="rate4"><label for="rate4">★</label>
+																<input type="radio" name="ostar" value="1" id="rate5"><label for="rate5">★</label>
+													</fieldset>
+							            			<textarea rows="40" cols="100" placeholder="리뷰를 작성해주세요 최대 500자" name="ocontent" style="height:100px;left:50px;top:51px;">
 							            			</textarea>
-
-							            			
 							            			<input type="submit" value="리뷰등록" class="redbtn">
 							            		</form>
 							            	</div>
-							            	
-							            	
 						            	</div>
-						            	
+						            	</c:if>
+						            	<c:if test="${member == null}">	
+						            			<div class="rv-hd">
+						            		<div class="div">
+							            		<h3>리뷰를 작성하려면 로그인 해주세요 :D</h3>
+						            			<form action="insertO.do" class="mb-3" name="myform" id="myform" method="post" style=" text-align: end; width: 95%;">
+							            			<textarea rows="40" cols="100" placeholder="로그인 후 리뷰를 작성해보세요 :D" name="ocontent" style="height:100px;left:50px;top:51px;" readonly>
+							            			</textarea>
+							            			<input type="submit" value="리뷰등록" class="redbtn">
+							            		</form>
+						            	</div>
+							            	</div>
+						            	</c:if>
+						          ${datas}  	
+								  <c:forEach var="o"  items="${datas}">
+								  <form>
 										<div class="mv-user-review-item">
+											<div>
 											<div class="user-infor">
-												
-												<div>
-													<h3>리뷰작성자</h3>
-													<div class="no-star">
-													<h3>별점</h3>
-														<i class="ion-android-star"></i>
-														
-													</div>
+													<h3>${o.mid}</h3> &nbsp;
 													<p class="time">
-														리뷰작성날짜
+														${o.odate}
 													</p>
 												</div>
 											</div>
-											
-											<p>작성된 리뷰 내용</p>
+											<bb:oboard midCheck="${o.mid}" oid="${o.oid}" nid="${o.nid}"/>
+											<input type="text" value="${o.ocontent}"  readonly>		
+											<p>${o.ocontent}</p>
+											<div class="no-star">
+													<i class="ion-android-star"></i><h3>${o.ostar}</h3>
+													</div>
+													
+													<!-- <a href="updateO.do?oid=${oid}">수정</a>&nbsp;<a href="deleteO.do?oid=${oid}">삭제</a> -->
 										</div>
-		
-										
+										</form>
+										</c:forEach>
+									
+									 
+									<%--	<c:if test="${cnt < datasSize}">
+									<a href="novelBoard.do?cnt=${cnt+2}">더보기&gt;&gt;</a>
+										</c:if>
+										  --%>
+										 
 										<div class="topbar-filter">
-											<label>Reviews per page:</label>
-											<select>
-												<option value="range">5 Reviews</option>
-												<option value="saab">10 Reviews</option>
-											</select>
 											<div class="pagination2">
-												<span>Page 1 of 6:</span>
-												<a class="active" href="#">1</a>
-												<a href="#">2</a>
-												<a href="#">3</a>
-												<a href="#">4</a>
-												<a href="#">5</a>
-												<a href="#">6</a>
-												<a href="#"><i class="ion-arrow-right-b"></i></a>
+												<a href="novelBoard.do?cnt=${cnt+2}">더보기<i class="ion-arrow-right-b"></i></a>
 											</div>
 										</div>
 						            </div>

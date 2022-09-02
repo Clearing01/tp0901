@@ -9,7 +9,6 @@
       var pw_re = document.getElementById("signup_form_password_re");
       var name = document.getElementById("signup_form_Name");
       var Nickname = document.getElementById("signup_form_Nickname");
-      var add = document.getElementById("signup-form-address2");
       var phone = document.getElementById("signup_form_phoneNumber");
       var email = document.getElementById("signup-form-email");
       
@@ -50,11 +49,11 @@
          pw_re.focus();
          return false;
       }
-      // 비밀번호 영문자+숫자+특수조합(8~25자리 입력) 정규식
-      var pwdCheck = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$/;
+      // 비밀번호 영문자+숫자+특수조합(5~25자리 입력) 정규식
+      var pwdCheck = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{5,25}$/;
       
       if(!pwdCheck.test(pw.value)){
-         alert("비밀번호는 영문자 + 숫자+ 특수문자 조합으로 8~25자리 사용해야 합니다.");
+         alert("비밀번호는 영문자 + 숫자+ 특수문자 조합으로 5~25자리 사용해야 합니다.");
          pw.focus();
          return false;
       }

@@ -7,7 +7,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import dao.MemberDAO;
 import dao.SmsDAO;
@@ -32,6 +31,7 @@ public class Sms extends HttpServlet {
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doPost(request,response);
 	}
@@ -39,6 +39,7 @@ public class Sms extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// 로직
 		SmsVO vo = new SmsVO();
@@ -54,7 +55,7 @@ public class Sms extends HttpServlet {
 		//String mid = (String) session.getAttribute("mid");
 		//mvo.setMid(mid);
 		mvo.setMpw(randMpw);
-		mdao.update2_M(mvo);
+		mdao.selectOne_MID(mvo);
 		
 		// ****요청했던 곳(ajax)으로 result 값을 보낼 예정****
 		// 보통 어노테이션을 사용하는데 어려워서 이번 경우만 응답방식으로 이용

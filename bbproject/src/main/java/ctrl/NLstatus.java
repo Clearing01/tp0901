@@ -43,13 +43,21 @@ public class NLstatus extends HttpServlet {
 		vo = dao.selectOne(vo); // 해당 lid가 있는지 확인
 		
 		if(vo != null) { // 결과가 있다면
-			if(vo.getReport()==1 && vo.getLstatus()!=1) { // 신고가 되어 있다면 비추천 업데이트
+			if(vo.getReport()==1 && vo.getLstatus()==0) { // 신고가 되어 있다면 비추천 업데이트
+				vo.setFlag(false);
 				dao.update_L(vo);
-				System.out.println("로그: 비추천 update");
+				if(vo.getNlstatus()==0) {
+					System.out.println("로그: 비추천 +1");
+				}
+				else {
+					System.out.println("로그: 비추천 -1");
+				}
 			}
 			else { // 신고가 안되어 있다면 해당 lid 삭제
-				dao.delete_L(vo);
-				System.out.println("로그: 비추천 delete");
+				if(vo.getLstatus()==0 && vo.getReport()==0) {
+					dao.delete_L(vo);
+					System.out.println("로그: 비추천 delete");
+				}
 			}
 		}
 		else { // 결과가 없다면 비추천 생성
@@ -60,6 +68,7 @@ public class NLstatus extends HttpServlet {
 			System.out.println("로그: 비추천 insert");
 			dao.insert_STATUS(vo2);
 		}
+		
 		bVO.setBid(Integer.parseInt(request.getParameter("bid")));
 		bVO.setCnt_n(1);
 		result = bDAO.selectOne_cnt(bVO);

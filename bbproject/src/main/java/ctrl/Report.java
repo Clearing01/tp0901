@@ -40,13 +40,15 @@ public class Report extends HttpServlet {
 		vo = dao.selectOne(vo); // 해당 lid가 있는지 확인
 		
 		if(vo != null) { // 결과가 있다면
-			if(vo.getLstatus()==1 || vo.getNlstatus()==1) { // 신고가 되어 있다면 비추천 업데이트
+			if(vo.getLstatus()==1 || vo.getNlstatus()==1) { // 추천 또는 비추천이 되어 있다면 신고 업데이트
 				dao.update_R(vo);
 				System.out.println("로그: 신고 update");
 			}
 			else { // 신고가 안되어 있다면 해당 lid 삭제
-				dao.delete_L(vo);
-				System.out.println("로그: 신고 delete");
+				if(vo.getLstatus()==0 && vo.getNlstatus()==0) {
+					dao.delete_L(vo);
+					System.out.println("로그: 신고 delete");
+				}
 			}
 		}
 		else { // 결과가 없다면 비추천 생성
@@ -56,6 +58,7 @@ public class Report extends HttpServlet {
 			System.out.println("로그: 신고 insert");
 			dao.insert_RE(vo2);
 		}
+		
 		bVO.setBid(Integer.parseInt(request.getParameter("bid")));
 		bVO.setCnt_r(1);
 		result = bDAO.selectOne_cnt(bVO);
